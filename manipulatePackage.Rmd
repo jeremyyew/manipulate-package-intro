@@ -1,0 +1,93 @@
+---
+title: "Instant Interactive Plotting with the `manipulate` package"
+output: 
+  html_document:
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+You may download the script with all the code from this report, as well as a copy of this report, from this link: https://goo.gl/KSF9RZ. 
+
+## What does the `manipulate` package do?
+From the documentation: 
+
+> "The manipulate function accepts a **plotting expression** and a set of **controls** (e.g. slider, picker, checkbox, or button) which are used to **dynamically change values** within the expression. When a value is changed using its corresponding control the expression is automatically re-executed and the plot is redrawn."
+
+Essentially, we can generate 'interactive' plots where we can change input variables via a GUI, similar to Shiny apps, but with minimal setup. 
+
+#### Fun fact: 
+The `manipulate` package was created way back in 2015 by Joseph Allaire, who is the founder and current CEO of RStudio. The package never seemed to get really popular, presumably being overshadowed by flashier and more powerful interactive app packages like Shiny. However, in this report we make the case that the timeless simplicity of `manipulate` makes it still relevant, and something that you might even use for your next data analysis.  
+
+
+## Preview 
+```{r child = 'children/preview.Rmd'}
+```
+
+As you can see, using `manipulate` is really simple; for most scenarios, we can achieve basic interactive functionality with very little code, just following this template.
+
+## Examples
+The best way to learn how and when you can use `manipulate` effectively is to try it with examples. 
+
+Some key differences between Shiny apps and `manipulate` plots will become apparent in the examples. We will also summarize the general benefits and limitations of the `manipulate` package at the end of the report. 
+
+Note: `manipulate` only works within RStudio, since the controls are generated as part of the native RStudio GUI. Hence these examples **must be run in an R script**. If you run `manipulate` in a Rmarkdown chunk, you will simply see the plot image inline with no control. If you try to knit a Rmd file containing a chunk with `manipulate` code, however, you will get an error (unless you set `eval=FALSE` for that chunk.) 
+
+## Example 1: Exploring relationships in the `attitude` dataset 
+```{r child = 'children/ariyka.Rmd'}
+```
+
+## Example 2: Visualizing distributions in the `mpg` dataset
+```{r child = 'children/dom.Rmd'}
+```
+
+## Example 3: Browsing the ASEAN Tourism dataset
+```{r child = 'children/meghna.Rmd'}
+```
+
+## Example 4: Inserting multiple lines of code into `manipulate`
+```{r child = 'children/jeremy.Rmd'}
+```
+
+## Example 5: Generating graphics options quickly
+```{r child = 'children/uros.Rmd'}
+```
+
+## Summary
+
+### How is `manipulate` different from Shiny apps? 
+
+- Shiny apps are interactive web apps that can be published online. 
+- `manipulate` functions generates a GUI control panel within RStudio that allows you to automatically redraw plots. 
+- Shiny apps have both a 'server' and a 'user interface' component.
+- `manipulate` functions combine the 'server' and 'user interface' together. 
+
+### How can we use `manipulate`? 
+
+- Preliminary data exploration 
+- Finetuning parameters
+- Prototyping a Shiny app
+
+### Limitations
+
+- Not publishable - Only works within RStudio; cannot be embedded in Rmarkdown documents or in a web app. 
+- Tricky to use with ggplot2 aes() parameters. 
+- Limited number of input types (manipulate has 4 while Shiny has practically unlimited, because of extensions)
+- No GUI aesthetic customization. 
+- No extensions available. 
+- No custom event listening, delay or isolation. 
+- Only one output at a time, and only one type of output possible (plots). 
+
+### Benefits
+
+- Simple - easy to understand and apply. 
+- Fast - very little extra code required. 
+- Works with base graphics and ggplot2.
+
+## Bonus content
+```{r child = 'children/buttoncontrol.Rmd'}
+```
+
+
