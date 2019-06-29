@@ -1,0 +1,23 @@
+Here's a preview of how to use `manipulate` (adapted from the `manipulate` documentation):
+```{r eval=FALSE}
+library(manipulate)
+# Supply a single plotting expression, and any number of input controls that are assigned to variables, as parameters to the manipulate function.  
+manipulate(
+  plot(cars, xlim = c(x.min, x.max), 
+       type = plot_type, 
+       axes = axes, 
+       ann = label), 
+  # Refer to variables defined below. Order of parameters does not matter. 
+  x.min = slider(0, 15),
+  x.max = slider(15, 30, initial = 25),
+  plot_type = picker("p", "l", "b"),
+  axes = checkbox(TRUE, "Axes"),
+  label = checkbox(TRUE, "Labels")
+)
+```
+
+```{r, out.width = "800px", echo = FALSE}
+knitr::include_graphics("children/images/jeremy_img1.png")
+```
+
+If we run the code in an Rscript in RStudio, a plot will be drawn in the 'Plots' panel, with a gear icon in the top left corner. Clicking the gear icon reveals a small grey panel with the respective input controls that we defined, which we can manipulate to redraw the plot. 

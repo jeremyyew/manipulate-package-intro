@@ -1,0 +1,22 @@
+
+### The `button` control: 
+
+We've seen 3 out of 4 input controls that `manipulate` provides. The last one which we haven't seen is the `button` control. It is used to run custom actions within manipulate, similar to the actionButton in Shiny. 
+
+```{r eval=FALSE}
+manipulate(
+  {
+    if(resetSeed)
+      set.seed(sample(1:1000))
+    
+    hist(rnorm(n=100, mean=0, sd=3), breaks=bins)
+  },
+  bins = slider(1, 20, step=1, initial =5, label="Bins"),
+  resetSeed = button("Reset Seed")
+)
+```
+(The above example is from the `manipulate` documentation.)
+
+When the `button` control is assigned a variable within the `manipulate` function, by default its value is `FALSE`. After the plot is drawn, when the button is clicked, its value is changed to `TRUE`, and the code in the conditional expression is run. 
+
+Hence the `button` control may be used to run code that returns a different value each time it is evaluated (generating random seeds), or perhaps to visualize data before and after some change.

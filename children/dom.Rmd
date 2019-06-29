@@ -1,0 +1,106 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+Our second example will illustrate two points: 
+
+1. We can quickly test if there are correlations between variables in a dataset by applying the picker function in the manipulate widget to both x and y axes. 
+2. Using 'as.list' in our picker function helps us to quickly generate a list of all column names in a dataset rather than string values when we use 'list' or 'names'. 
+
+We will demonstrate this using the native mpg dataset. This dataset gives us information about vehicle performance of different car manufacturers in the US from 1998-2008. 
+
+Looking at the dataset, we can see that there are many variables such as:
+
+1.  manufacturer: Manufacturer/brand name
+2.  model: Car model name
+3.  displ: Engine displacement, in litres
+4.  year: Year of manufacture
+5.  cyl: Number of cylinders
+6.  trans: Type of transmission
+7.  drv: f = front-wheel drive, r = rear wheel drive, 4 = 4wd
+8.  cty: City miles per gallon
+9.  hwy: Highway miles per gallon
+10.  fl: Fuel type. e = ethanol, d = diesel, r = regular, p = premium, c = natural gas
+11.  class: The 'type' of car
+
+How then do we quickly make sense of this dataset to understand fuel efficiency of different automobile brands in the US? 
+
+```{r eval=FALSE}
+
+  # Begin manipulate function.
+  # Nest ggplot under the manipulate function.
+manipulate(
+  # Note that aes_string() is used instead of aes().
+  # This is to allow input of a string.
+  # We set aes_string(x,y) so that we can manipulate them later. 
+  ggplot(data = mpg, aes_string(x, y))+  
+    geom_boxplot(fill = "white", colour = "#3366FF")+  # adjust the colour of the boxplots to make them more visible.
+    theme(axis.text.x = element_text(angle = 90,  
+                                     vjust = 0.5,
+                                     hjust = 1)),
+  # Create 2 picker options for x-variable and y-variable so that we can just them later. We use as.list so that we can generate a list of the colnames of the mpg dataset and use it in our picker function.
+  x = picker(as.list(names(mpg))),    
+  y = picker(as.list(names(mpg)))     
+)
+```
+
+Let's take a look at the code. Here, we use ggplot to produce boxplots for visualization, and we nest it within the 'manipulate' function. Unlike the previous example, we use y = picker(as.list(names(mpg))) to generate a list of all the column names rather than literal string values. This is convenient as it saves us from having to type out all the column names of our variables aka y = picker("manufacturer", "model", "displ", "year", "cyl", "trans" ... etc...).
+
+One key point to note is that we must use `as.list()` to wrap the string vector when we use `names(mpg)`. If we use `picker(names(mpg))`, we see that there is only one input option created, which is the entire string vector itself.  After trial and error, we discovered that the input controls for 'picker' only take a list of arguments, not a vector. We cannot use `list(names(mpg))` either because that returns a list with only one component - the string vector itself - which gives the same result as using  `picker(names(mpg))`. 
+
+#### Initial Plot: manufacturer against manufacturer
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = mpg, aes(manufacturer, 
+                              manufacturer)) +
+  geom_boxplot(fill = "white", colour = "#3366FF") +
+  theme(axis.text.x = element_text(angle = 90,
+                                     vjust = 0.5,
+                                     hjust = 1))
+               
+```
+
+After running our 'manipulate' widget, our initial plot shows a y = x function, because both picker values are set at the default 'manufacturer'. So how can we use our widget to quickly analyse the data? 
+
+Let's say I am an environmental studies major and I want to know which car manufacturers have the highest fuel efficiency. From our mpg dataset, we can analyse fuel efficiency of different car manufacturers by looking at the correlation between automobile manufacturers and variables like the number of miles it runs per gallon. Let's take a look.
+
+#### Example A: City miles per gallon (cty) against manufacturer
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = mpg, aes(manufacturer, 
+                              cty)) +
+  geom_boxplot(fill = "white", colour = "#3366FF")+
+theme(axis.text.x = element_text(angle = 90,
+                                     vjust = 0.5,
+                                     hjust = 1))
+       
+```
+
+A common way to measure fuel efficiency is to look at miles travelled per gallon. Using our 'manipulate' widget, we let our x-picker remain at the manufacturer variable, and set our y-picker to cty (city miles per gallon). Any interesting observations? 
+
+There is much to be interpreted, but one can observe that Japanese car manufacturers like Honda, Nissan and Toyota have the top 3 highest median city miles per gallon as compared to American car manufacturers like Ford, Jeep and Chevrolet. 
+
+Nothing against American cars, but this observation suggests that Japanese car manufacturers produce cars that have higher fuel efficiency for city driving. Closer statistical analysis of the dataset may surface more interesting observations about car manufacturers and fuel efficiency. Let's take a look at another metric - highway miles per gallon. 
+
+#### Example B: Highway miles per gallon (hwy) against manufacturer
+
+```{r echo=FALSE}
+library(ggplot2)
+ggplot(data = mpg, aes(manufacturer, 
+                              hwy)) +
+  geom_boxplot(fill = "white", colour = "#3366FF")+
+theme(axis.text.x = element_text(angle = 90,
+                                     vjust = 0.5,
+                                     hjust = 1))
+               
+```
+
+Highway miles per gallon is another metric for measuring fuel effciency. Because there is more continuous driving (less traffic stops) on highways than in cities, this data indicates how efficient different car brands are at purely continuous driving.
+
+So, we let our x-picker remain at the manufacturer variable, and set our y-picker to hwy (highway miles per gallon). Again, we can observe correlations between the number of highway miles per gallon against the car manufacturer.
+
+There appears to be a similar trend in fuel efficiency for highway driving as city driving. One interesting observation - it appears that Pontiac brand cars' fuel effiency on highways improves more than proportionately to its fuel efficiency on highways in cities. 
+
+As seen, the 'manipulate' widget can help us to quickly observe relationships between variables in a dataset very quickly. 

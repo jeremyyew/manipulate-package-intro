@@ -1,0 +1,189 @@
+The inspiration and data sets for this example come from [this website](https://4dpiecharts.com/2011/08/17/user2011-easy-interactive-ggplots-talk/). The chief focus of the article is transforming the data to produce a more pleasing representation in `ggplot2`. Let's see if we can do a better (or quicker) job with `manipulate`.
+
+First we make a preliminary graph of both of the data sets.
+
+```{r}
+library(ggplot2)
+library(manipulate)
+library(RColorBrewer)
+chromium <- read.csv("data/chromium.csv", stringsAsFactors = FALSE)
+
+ggplot(chromium, aes(air, bm, colour = welding.type)) +
+  geom_point() +
+  geom_smooth(aes(group = ""), method = "lm", colour = "white")
+```
+```{r}
+
+nickel <- read.csv("data/nickel.csv", stringsAsFactors = FALSE)
+
+ggplot(nickel, aes(air, bm, colour = welding.type)) +
+  geom_point() +
+  geom_smooth(aes(group = ""), method = "lm", colour = "white")
+```
+
+They look rather... *displeasing*. The data is very sparse farther from the origin, and while ggplot2 chooses more pleasant colours than base graphics, they are hardly ideal.
+
+We know we can find all kinds of handy transformations in `ggplot2`, but who has time to try them all out? `RColorBrewer` pallets are beautiful, but their codes are difficult to memorize, and the outcome of their application impossible to visualize.
+
+What about R's built in colours? You know you need a kind of *blue*, but who knows if they called it `"powderblue"` or `"babyblue"`. Besides, who can be bothered to read through the entire output of `colors()` every few seconds? Not you!
+
+With `manipulate` you simply paste all the options from the help files or use helper functions that list them for you to try them out on the spot! You can *search* through the options by simply typing the first few letters.
+
+In addition, we are taking the easy way out an using code blocks! Granted, we lose some of the functionality of passing a graphing function to `manipulate`, but we gain at least some of it pack by using `picker()` to select the data we're plotting.
+
+```{r eval=FALSE}
+library(ggplot2)
+library(manipulate)
+manipulate({
+  p <- ggplot(data, aes(air, bm, colour = welding.type)) + geom_point()
+  p + geom_smooth(aes(group = ""), method = "lm", colour = lm) +
+    scale_x_continuous(trans = xScale) +
+    scale_y_continuous(trans = yScale) +
+    scale_colour_manual(values = brewer.pal(4, scater))
+},
+# Pick appropriate transformation
+yScale = picker("asn", "atanh", "boxcox",
+                "exp", "identity", "log",
+                "log10", "log1p", "log2", "logit",
+                "probability", "probit", "reciprocal",
+                "reverse", "sqrt",
+                label = "Y Scale Transformation"),
+xScale = picker("asn", "atanh", "boxcox",
+                "exp", "identity", "log",
+                "log10", "log1p", "log2", "logit",
+                "probability", "probit", "reciprocal",
+                "reverse", "sqrt",
+                label = "X Scale Transformation"),
+# Switch between datasets.
+data = picker("Chromium" = chromium, "Nickel" = nickel, label = "Datasets"),
+# Pick appropriate point colour (searchable).
+scater = picker(as.list(rownames(brewer.pal.info)),
+                label = "Palette"),
+# Pick appropriate regresion colour (searchable).
+# Use as.list() as picker eithr takes lists or individual arguments.
+# It would interpret a vector as a single option which it would not know
+# how to handle.
+lm = picker(as.list(colours()),
+            label = "Regression")
+)
+```
+
+Whoops, the graph is all garbled, and there are all kind of warnings! This is because `picker()` defaults to the first argument unless supplied with an `initial = ""` argument. And remember, not all transformations are possible on all data (e.g. log based transformations on negative values)
+
+Let's fix that.
+
+```{r eval=FALSE}
+library(ggplot2)
+library(manipulate)
+manipulate({
+  p <- ggplot(data, aes(air, bm, colour = welding.type)) + geom_point()
+  p + geom_smooth(aes(group = ""), method = "lm", colour = lm) +
+    scale_x_continuous(trans = xScale) +
+    scale_y_continuous(trans = yScale) +
+    scale_colour_manual(values = brewer.pal(4, scater))
+},
+# Pick appropriate transformation
+yScale = picker("asn", "atanh", "boxcox",
+                "exp", "identity", "log",
+                "log10", "log1p", "log2", "logit",
+                "probability", "probit", "reciprocal",
+                "reverse", "sqrt", initial = "identity",
+                label = "Y Scale Transformation"),
+xScale = picker("asn", "atanh", "boxcox",
+                "exp", "identity", "log",
+                "log10", "log1p", "log2", "logit",
+                "probability", "probit", "reciprocal",
+                "reverse", "sqrt", initial = "identity",
+                label = "X Scale Transformation"),
+# Switch between datasets.
+data = picker("Chromium" = chromium, "Nickel" = nickel, label = "Datasets"),
+# Pick appropriate point colour (searchable).
+scater = picker(as.list(rownames(brewer.pal.info)),
+                label = "Palette"),
+# Pick appropriate regresion colour (searchable).
+# Use as.list() as picker eithr takes lists or individual arguments.
+# It would interpret a vector as a single option which it would not know
+# how to handle.
+lm = picker(as.list(colours()),
+            label = "Regression")
+)
+```
+
+Now let's do some picking.
+
+```{r echo = FALSE}
+knitr::include_graphics("children/images/uros_img1.png")
+```
+
+`"Set2"` and `"hotpink1"` seem rather attractive, with `"Set2"` being a slightly more tame version of `ggplot2`'s defaults and `"hotpink1"` simply being fabulous. As for transformations, `"log10"` seems to work best, and is also rather easy to interpret.
+
+```{r, echo = FALSE}
+  p <- ggplot(chromium, aes(air, bm, colour = welding.type)) + geom_point()
+  p + geom_smooth(aes(group = ""), method = "lm", colour = "hotpink1") +
+    scale_x_continuous(trans = "log10") +
+    scale_y_continuous(trans = "log10") +
+    scale_colour_manual(values = brewer.pal(4, "Set2"))
+```
+
+Your plot is now ready to be finalized and beautified just how you like it, with all the trial and error out of the way and only labels to be changed.
+
+For reference, this is the code used on the example website simply to try out two of the countless transformation `ggplot2`. One might as well try them out one by one.
+
+```{r, eval = FALSE}
+chromium <- read.csv("chromium.csv")
+nickel <- read.csv("nickel.csv")
+
+p <- ggplot(chromium, aes(air, bm)) +
+  geom_point()
+
+win_ctrls <- gwindow("Plot controls 1-4")
+grp_ctrls <- ggroup(container = win_ctrls, horizontal = FALSE)
+
+#1 Changing scales
+available_scales <- c(
+  Linear      = "identity", 
+  Log           = "log10"
+)   
+
+frm_scale_trans_y <- gframe(
+  "Y scale transformation", 
+  container = grp_ctrls,
+  expand = TRUE
+)  
+
+rad_scale_trans_y <- gradio(
+  names(available_scales), 
+  container = frm_scale_trans_y,
+  handler = function(h, ...)
+  {
+    scale_trans_y <- available_scales[svalue(h$obj)]  
+    p <<- p + 
+      scale_y_continuous(
+        trans = scale_trans_y
+      )   
+    print(p)  
+  }
+)
+
+frm_scale_trans_x <- gframe(
+  "X scale transformation", 
+  container = grp_ctrls,
+  expand = TRUE
+)  
+
+rad_scale_trans_x <- gradio(
+  names(available_scales), 
+  container = frm_scale_trans_x,
+  handler = function(h, ...)
+  {
+    scale_trans_x <- available_scales[svalue(h$obj)]  
+    p <<- p + 
+      scale_x_continuous(
+        trans = scale_trans_x
+      )   
+    print(p)  
+  }
+)
+```
+
+

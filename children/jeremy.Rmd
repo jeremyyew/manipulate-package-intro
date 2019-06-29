@@ -1,0 +1,75 @@
+So we've seen how we can explore a given dataset with `manipulate`, but so far we've only done minimal preprocessing of the data. What if we want to parameterize our data processing? That is, how can we make more than one line of code react to changes in our input controls, as is done with Shiny apps?  
+
+We'll describe two simple approaches, which we will explore using exactly the same code in the template Shiny app, which uses the Old Faithful Geyser data. 
+```{r}
+head(faithful)
+```
+The sample Shiny app simply allows us to change the bin width of the histogram. Here is the part of the code which processes the data and renders the output: 
+
+```{r eval=FALSE}
+output$distPlot <- renderPlot({
+      # generate bins based on input$bins from ui.R
+      x    <- faithful[, 2] 
+      bins <- seq(min(x), max(x), length.out = input$bins + 1)
+      
+      # draw the histogram with the specified number of bins
+      hist(x, breaks = bins, col = 'darkgray', border = 'white')
+   })
+```
+
+And here is what the Shiny app looks like: 
+
+```{r echo = FALSE}
+knitr::include_graphics("children/images/jeremy_img2.png")
+```
+
+So, the first, straightforward approach to replicating this in `manipulate` is to simply place all the lines of code (including the plotting expression) within curly braces, just like how it is done in the Shiny app code. This is good if you only have a few lines of code.
+
+```{r eval=FALSE}
+manipulate(
+  {x <- faithful[, 2] 
+  bins <- seq(min(x), max(x), length.out = numBins + 1)
+  hist(x, breaks = bins, col = 'darkgray', border = 'white')},
+  
+  numBins = slider(min = 1, max = 50, initial = 30, label = "Number of bins:")
+)
+```
+
+And again this gets you the same basic functionality with one and a half extra lines of code. 
+
+```{r echo = FALSE}
+knitr::include_graphics("children/images/jeremy_img3.png")
+```
+
+
+Note: We do realize that the three lines of code in the curly braces could have been combined into one line. But often this isn't possible or sane, we just picked this example for the sake of simplicity. 
+
+Note: We actually discovered this ourselves, this style was not used in any of the documentation examples nor any of the very few articles online that used `manipulate`. All the examples we've seen were single-line plotting expressions, with preprocessing occurring independently outside of the `manipulate` function. 
+
+The second approach would be to abstract the relevant plotting code into a separate function defined outside of `manipulate`. This function takes the input control variables as string parameters, runs the processing steps, and returns the plot expression. This function will be passed to the `manipulate` function and given the input control variables. 
+
+```{r eval=FALSE}
+f <- function(numBins) {
+  x <- faithful[, 2] 
+  bins <- seq(min(x), max(x), length.out = numBins + 1)
+  hist(x, breaks = bins, col = 'darkgray', border = 'white')
+}
+  
+manipulate(
+  f(numBins),
+  numBins = slider(min = 1, max = 50, initial = 30, label = "Number of bins:")
+)
+```
+And it works exactly the same as the curly braces approach. 
+
+This approach has several benefits: 
+
+- Cleaner code - separates plotting logic from UI implementation, similar to how Shiny app's server and UI code are separate. This is important when your code is long, you don't want to wrap the entire thing in a `manipulate` function.
+
+- Easier debugging - if the plot isn't working, simply pass the function literal string values to run it and check if the problem is in the logic or in the UI. 
+
+- Reduces code duplication, if we are planning to call `manipulate` multiple times for whatever reason. Or if we want our script to generate both a `manipulate` plot as well as a final, static plot afterwards. 
+
+Note: We also came up with this ourselves.
+
+It is up to you to judge which approach is more appropriate depending on the dataset. Even though these are very simple tips, hopefully it makes working with `manipulate` even easier. 
