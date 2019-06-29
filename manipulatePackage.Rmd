@@ -3,6 +3,7 @@ title: "Instant Interactive Plotting with the `manipulate` package"
 output: 
   html_document:
     toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
